@@ -1,0 +1,18 @@
+title: Supreme Court Judgments
+description: Searchable database of Indian Supreme Court cases
+theme: jekyll-theme-minimal
+plugins:
+  - jekyll-seo-tag
+
+# Collections
+collections:
+  cases:
+    output: true
+    permalink: /cases/:title/
+
+defaults:
+  - scope:
+      path: ""
+      type: "cases"
+    values:
+      layout: "case"
