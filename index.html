@@ -1,0 +1,24 @@
+---
+layout: default
+title: Home
+---
+
+<div class="search-container">
+  <input type="text" id="search-input" placeholder="Search judgments...">
+  <div id="search-results"></div>
+</div>
+
+<h2>Recent Judgments</h2>
+<ul class="case-list">
+  {% for case in site.cases %}
+  <li>
+    <a href="{{ case.url | relative_url }}">
+      <strong>{{ case.title }}</strong><br>
+      <small>{{ case.date | date: "%B %d, %Y" }}</small>
+    </a>
+  </li>
+  {% endfor %}
+</ul>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lunr.js/2.3.9/lunr.min.js"></script>
+<script src="{{ '/assets/js/search.js' | relative_url }}"></script>
