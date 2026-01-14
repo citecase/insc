@@ -24,7 +24,16 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* The "Invisible" Input */
+        /* The "Invisible" Input Container */
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 95%; 
+        }
+
         #inscInput {
             border: none;
             background: transparent;
@@ -32,21 +41,28 @@
             caret-color: #2563eb;
             font-weight: 600;
             width: 100%;
-            max-width: 700px;
-        }
-
-        /* Number Mode Styling */
-        .number-mode #inscInput {
-            width: 150px;
-            text-align: left;
-        }
-
-        /* Name Mode Styling */
-        .name-mode #inscInput {
-            width: 100%;
             text-align: center;
         }
 
+        /* The Prediction Text (placed below input) */
+        #predictionText {
+            margin-top: 0.5rem;
+            font-weight: 400;
+            font-style: italic;
+            min-height: 1.2em;
+            color: #9ca3af; 
+            transition: color 0.3s ease;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dark #predictionText {
+            color: #4b5563;
+        }
+
+        /* Result styling */
         .fade-in {
             animation: fadeIn 0.4s ease-out forwards;
         }
@@ -56,54 +72,41 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Hide Scrollbar */
         ::-webkit-scrollbar { display: none; }
-
-        .suggestion-item.active {
-            background-color: #f9fafb;
-            color: #2563eb;
-        }
-
-        .dark .suggestion-item.active {
-            background-color: #1f2937;
-            color: #60a5fa;
-        }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-center p-6 bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100" onclick="document.getElementById('inscInput').focus()">
+<body class="h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100" onclick="document.getElementById('inscInput').focus()">
 
     <!-- Dark Mode Toggle -->
-    <button onclick="toggleDarkMode(event)" class="fixed top-8 right-8 p-2 rounded-full border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-50 focus:outline-none">
-        <!-- Sun icon (visible in dark mode) -->
-        <svg id="sun-icon" class="hidden dark:block w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path></svg>
-        <!-- Moon icon (visible in light mode) -->
-        <svg id="moon-icon" class="block dark:hidden w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+    <button onclick="toggleDarkMode(event)" class="fixed top-6 right-6 sm:top-8 sm:right-8 p-2 rounded-full border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-50 focus:outline-none">
+        <svg id="sun-icon" class="hidden dark:block w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path></svg>
+        <svg id="moon-icon" class="block dark:hidden w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
     </button>
 
-    <div class="text-center w-full max-w-4xl flex flex-col items-center">
+    <!-- Center Content -->
+    <div class="flex-grow flex flex-col items-center justify-center w-full max-w-5xl">
         
-        <!-- Search Interface -->
-        <div id="searchWrapper" class="relative w-full flex flex-col items-center">
-            <div id="searchContainer" class="flex items-center justify-center text-3xl md:text-5xl tracking-tighter transition-all duration-300 number-mode">
-                <span id="prefix" class="whitespace-nowrap text-gray-800 dark:text-gray-300 font-light mr-4">2026 INSC</span>
+        <!-- Stacked UI -->
+        <div id="searchContainer" class="flex flex-col items-center justify-center transition-all duration-300 w-full">
+            <span id="prefix-year" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-1">2026</span>
+            <span id="prefix-insc" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-4 sm:mb-6">INSC</span>
+            
+            <div class="input-wrapper">
                 <input 
                     type="text" 
                     id="inscInput" 
-                    placeholder="..." 
-                    class="placeholder-gray-200 dark:placeholder-gray-700 text-blue-600 dark:text-blue-400"
+                    placeholder="1-61" 
+                    class="placeholder-gray-200 dark:placeholder-gray-800 text-blue-600 dark:text-blue-400 text-2xl sm:text-3xl md:text-5xl"
                     autofocus
                     autocomplete="off"
+                    spellcheck="false"
                 >
+                <div id="instruction" class="mt-2 text-gray-300 dark:text-gray-600 text-[9px] sm:text-[10px] tracking-[0.3em] uppercase transition-opacity">
+                    Type number or case name
+                </div>
+                <!-- Prediction Text appears directly below the typing area -->
+                <div id="predictionText" class="text-base sm:text-lg md:text-xl px-4"></div>
             </div>
-            
-            <!-- Suggestions Dropdown -->
-            <div id="suggestions" class="absolute top-full left-1/2 -translate-x-1/2 mt-6 w-full max-w-xl bg-white dark:bg-gray-800 rounded-xl overflow-hidden z-50 pointer-events-auto shadow-2xl border border-transparent dark:border-gray-700">
-                <!-- Suggestions will be injected here -->
-            </div>
-        </div>
-
-        <div id="instruction" class="mt-8 text-gray-300 dark:text-gray-600 text-[10px] tracking-[0.3em] uppercase transition-opacity">
-            Type number or case name
         </div>
 
         <!-- Result Display -->
@@ -111,6 +114,11 @@
             <!-- Results appear here -->
         </div>
     </div>
+
+    <!-- Initiative Footer -->
+    <footer class="pb-4 text-gray-200 dark:text-gray-800 text-[9px] sm:text-[11px] tracking-widest uppercase text-center select-none">
+        Project CiteCase Initiative To Promote INSC Citations
+    </footer>
 
     <script>
         const judgments = [
@@ -173,13 +181,13 @@
         ];
 
         const input = document.getElementById('inscInput');
-        const suggestionsBox = document.getElementById('suggestions');
+        const prediction = document.getElementById('predictionText');
         const resultArea = document.getElementById('resultArea');
-        const searchContainer = document.getElementById('searchContainer');
+        const prefixYear = document.getElementById('prefix-year');
+        const prefixInsc = document.getElementById('prefix-insc');
         const instruction = document.getElementById('instruction');
-        const prefix = document.getElementById('prefix');
 
-        let currentFocus = -1;
+        let currentMatch = null;
 
         // Dark Mode Logic
         function toggleDarkMode(e) {
@@ -194,98 +202,64 @@
         }
 
         input.addEventListener('input', (e) => {
-            const val = input.value.trim();
-            closeAllLists();
-
-            if (!val) {
+            const val = input.value;
+            const trimmed = val.trim();
+            
+            if (!trimmed) {
+                prediction.textContent = "";
+                currentMatch = null;
                 switchToNumberMode();
                 return;
             }
 
-            // Check if input is only numeric
-            const isNumeric = /^\d+$/.test(val);
+            const isNumeric = /^\d+$/.test(trimmed);
 
             if (isNumeric) {
                 switchToNumberMode();
+                prediction.textContent = "";
+                currentMatch = null;
             } else {
                 switchToNameMode();
-                currentFocus = -1;
                 
-                const matches = judgments.filter(j => 
+                // Find prediction that contains the typed string anywhere
+                const match = judgments.find(j => 
                     j.name.toLowerCase().includes(val.toLowerCase())
-                ).slice(0, 8);
+                );
 
-                if (matches.length > 0) {
-                    matches.forEach((match) => {
-                        const div = document.createElement("DIV");
-                        div.className = "suggestion-item p-4 text-left border-b border-gray-50 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors";
-                        div.innerHTML = `
-                            <div class="text-[10px] text-blue-600 dark:text-blue-400 font-bold mb-1 uppercase tracking-widest font-sans">${match.citation || '2026 INSC ' + match.id}</div>
-                            <div class="text-sm text-gray-800 dark:text-gray-200 line-clamp-1 italic">${match.name}</div>
-                        `;
-                        div.addEventListener("click", () => {
-                            input.value = "";
-                            renderResult(match);
-                            closeAllLists();
-                        });
-                        suggestionsBox.appendChild(div);
-                    });
-                    suggestionsBox.classList.add('shadow-2xl', 'border', 'border-gray-100', 'dark:border-gray-700');
+                if (match && val.length > 0) {
+                    currentMatch = match;
+                    prediction.textContent = match.name;
+                } else {
+                    prediction.textContent = "";
+                    currentMatch = null;
+                }
+            }
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if ((e.key === "ArrowRight" || e.key === "Tab") && currentMatch) {
+                e.preventDefault();
+                input.value = currentMatch.name;
+                prediction.textContent = "";
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                const query = input.value.trim();
+                if (currentMatch && !query.toLowerCase().includes(currentMatch.name.toLowerCase())) {
+                    performSearch(currentMatch.name);
+                } else if (query) {
+                    performSearch(query);
                 }
             }
         });
 
         function switchToNumberMode() {
-            prefix.classList.remove('hidden');
-            searchContainer.classList.remove('name-mode');
-            searchContainer.classList.add('number-mode');
+            prefixYear.classList.remove('hidden');
+            prefixInsc.classList.remove('hidden');
         }
 
         function switchToNameMode() {
-            prefix.classList.add('hidden');
-            searchContainer.classList.remove('number-mode');
-            searchContainer.classList.add('name-mode');
-        }
-
-        input.addEventListener('keydown', (e) => {
-            const items = suggestionsBox.getElementsByClassName("suggestion-item");
-            if (e.key === "ArrowDown") {
-                currentFocus++;
-                addActive(items);
-            } else if (e.key === "ArrowUp") {
-                currentFocus--;
-                addActive(items);
-            } else if (e.key === "Enter") {
-                e.preventDefault();
-                if (currentFocus > -1) {
-                    if (items[currentFocus]) items[currentFocus].click();
-                } else {
-                    const query = input.value.trim();
-                    if (query) performSearch(query);
-                }
-            } else if (e.key === "Escape") {
-                closeAllLists();
-            }
-        });
-
-        function addActive(items) {
-            if (!items) return false;
-            removeActive(items);
-            if (currentFocus >= items.length) currentFocus = 0;
-            if (currentFocus < 0) currentFocus = (items.length - 1);
-            items[currentFocus].classList.add("active");
-            items[currentFocus].scrollIntoView({ block: 'nearest' });
-        }
-
-        function removeActive(items) {
-            for (let i = 0; i < items.length; i++) {
-                items[i].classList.remove("active");
-            }
-        }
-
-        function closeAllLists() {
-            suggestionsBox.innerHTML = "";
-            suggestionsBox.classList.remove('shadow-2xl', 'border', 'dark:border-gray-700');
+            prefixYear.classList.add('hidden');
+            prefixInsc.classList.add('hidden');
         }
 
         function performSearch(query) {
@@ -304,11 +278,13 @@
             } else {
                 renderError(query);
             }
-            closeAllLists();
+            prediction.textContent = "";
         }
 
         function renderResult(caseData) {
-            searchContainer.classList.add('opacity-0');
+            prefixYear.classList.add('hidden');
+            prefixInsc.classList.add('hidden');
+            input.parentElement.classList.add('hidden');
             instruction.classList.add('hidden');
 
             const tags = caseData.cat ? caseData.cat.split(',').map(t => t.trim()) : [];
@@ -318,13 +294,18 @@
                 </span>
             `).join(' ');
 
+            let finalCitation = caseData.citation;
+            if (!finalCitation || finalCitation === "2026") {
+                finalCitation = "2026 INSC " + caseData.id;
+            }
+
             resultArea.innerHTML = `
                 <div class="fade-in text-center w-full max-w-2xl px-6">
-                    <h2 class="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-4 italic">
+                    <h2 class="text-2xl sm:text-3xl md:text-5xl font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-4 italic">
                         ${caseData.name}
                     </h2>
-                    <div class="text-blue-600 dark:text-blue-400 font-bold text-xl mb-10 tracking-tight font-sans">
-                        ${caseData.citation || '2026 INSC ' + caseData.id}
+                    <div class="text-blue-600 dark:text-blue-400 font-bold text-lg sm:text-xl mb-10 tracking-tight font-sans">
+                        ${finalCitation}
                     </div>
                     
                     <div class="flex flex-wrap justify-center gap-2 mb-14">
@@ -334,7 +315,7 @@
                     <a 
                         href="${caseData.link}" 
                         target="_blank" 
-                        class="inline-block px-14 py-4 bg-gray-900 dark:bg-blue-600 text-white text-[10px] tracking-[0.3em] uppercase font-bold rounded-full hover:bg-black dark:hover:bg-blue-700 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-sans"
+                        class="inline-block px-10 sm:px-14 py-4 bg-gray-900 dark:bg-blue-600 text-white text-[10px] tracking-[0.3em] uppercase font-bold rounded-full hover:bg-black dark:hover:bg-blue-700 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-sans"
                     >
                         Read Headnotes
                     </a>
@@ -352,10 +333,9 @@
         }
 
         function renderError(query) {
-            searchContainer.classList.add('opacity-10');
             resultArea.innerHTML = `
                 <div class="fade-in text-center py-10">
-                    <p class="text-gray-400 text-xl mb-6 italic text-red-500">Judgment not found for "${query}"</p>
+                    <p class="text-gray-400 text-lg sm:text-xl mb-6 italic text-red-500 px-4">Judgment not found for "${query}"</p>
                     <button 
                         onclick="resetSearch()" 
                         class="text-blue-600 dark:text-blue-400 font-bold hover:underline text-sm uppercase tracking-widest font-sans"
@@ -367,17 +347,16 @@
         }
 
         function resetSearch() {
-            searchContainer.classList.remove('opacity-0', 'opacity-10');
+            prefixYear.classList.remove('hidden');
+            prefixInsc.classList.remove('hidden');
+            input.parentElement.classList.remove('hidden');
             instruction.classList.remove('hidden');
             resultArea.innerHTML = '';
             input.value = "";
+            prediction.textContent = "";
             switchToNumberMode();
             input.focus();
         }
-
-        document.addEventListener("click", (e) => {
-            if (e.target !== input) closeAllLists();
-        });
     </script>
 </body>
 </html>
