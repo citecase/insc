@@ -24,7 +24,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* The "Invisible" Input Container */
         .input-wrapper {
             position: relative;
             display: flex;
@@ -44,25 +43,39 @@
             text-align: center;
         }
 
-        /* The Prediction Text (placed below input and instruction) */
-        #predictionText {
-            margin-top: 1.5rem;
+        /* Suggestion Items */
+        .suggestion-slot {
             font-weight: 400;
             font-style: italic;
-            min-height: 1.2em;
+            min-height: 1.5em;
             color: #9ca3af; 
-            transition: color 0.3s ease;
+            transition: all 0.2s ease;
             max-width: 90%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            cursor: pointer;
+            opacity: 0.5;
+            padding: 2px 12px;
+            border-radius: 9999px;
+        }
+        
+        .suggestion-slot.active {
+            opacity: 1;
+            color: #2563eb;
+            background-color: rgba(37, 99, 235, 0.05);
+            transform: scale(1.05);
         }
 
-        .dark #predictionText {
+        .dark .suggestion-slot {
             color: #4b5563;
         }
+        
+        .dark .suggestion-slot.active {
+            color: #60a5fa;
+            background-color: rgba(96, 165, 250, 0.1);
+        }
 
-        /* Result styling */
         .fade-in {
             animation: fadeIn 0.4s ease-out forwards;
         }
@@ -77,6 +90,13 @@
 </head>
 <body class="h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100" onclick="document.getElementById('inscInput').focus()">
 
+    <!-- Header Utilities -->
+    <div class="fixed top-6 left-6 sm:top-8 sm:left-8 z-50 flex gap-4">
+        <a href="https://citecase.in/register" target="_blank" class="text-[10px] sm:text-[11px] font-medium tracking-widest uppercase text-gray-400 dark:text-gray-600 hover:text-blue-600 transition-all select-none">
+            Support Us
+        </a>
+    </div>
+
     <!-- Dark Mode Toggle -->
     <button onclick="toggleDarkMode(event)" class="fixed top-6 right-6 sm:top-8 sm:right-8 p-2 rounded-full border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all z-50 focus:outline-none">
         <svg id="sun-icon" class="hidden dark:block w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 11H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path></svg>
@@ -89,36 +109,42 @@
         <!-- Stacked UI: 2026 -> INSC -> Input -->
         <div id="searchContainer" class="flex flex-col items-center justify-center transition-all duration-300 w-full">
             <span id="prefix-year" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-1">2026</span>
-            <span id="prefix-insc" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-4 sm:mb-6">INSC</span>
+            <span id="prefix-insc" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-0">INSC</span>
             
             <div class="input-wrapper">
+                <!-- Predictive options ABOVE -->
+                <div id="suggestions-top" class="flex flex-col items-center w-full mb-0 gap-1 h-10 justify-end"></div>
+
                 <input 
                     type="text" 
                     id="inscInput" 
                     placeholder="1-55" 
-                    class="placeholder-gray-200 dark:placeholder-gray-800 text-blue-600 dark:text-blue-400 text-2xl sm:text-3xl md:text-5xl"
+                    class="placeholder-gray-200 dark:placeholder-gray-800 text-blue-600 dark:text-blue-400 text-2xl sm:text-3xl md:text-5xl py-1"
                     autofocus
                     autocomplete="off"
                     spellcheck="false"
                 >
-                <!-- Instruction text moved below the input with slight spacing -->
-                <div id="instruction" class="mt-3 text-gray-300 dark:text-gray-600 text-[9px] sm:text-[11px] tracking-[0.3em] uppercase transition-opacity">
+                <div id="instruction" class="mt-1 text-gray-300 dark:text-gray-600 text-[9px] sm:text-[11px] tracking-[0.3em] uppercase transition-opacity">
                     Enter Citation Number Or Case / Law Name
                 </div>
-                <!-- Prediction Text appears directly below the instruction -->
-                <div id="predictionText" class="text-base sm:text-lg md:text-xl px-4"></div>
+
+                <!-- Predictive options BELOW -->
+                <div id="suggestions-bottom" class="flex flex-col items-center w-full mt-2 gap-1"></div>
             </div>
         </div>
 
         <!-- Result Display -->
-        <div id="resultArea" class="mt-4 flex flex-col items-center w-full">
-            <!-- Results appear here -->
-        </div>
+        <div id="resultArea" class="mt-4 flex flex-col items-center w-full"></div>
     </div>
 
     <!-- Initiative Footer -->
-    <footer class="pb-4 text-gray-200 dark:text-gray-800 text-[9px] sm:text-[11px] tracking-widest uppercase text-center select-none">
-        Project CiteCase Initiative To Promote INSC Citations
+    <footer class="pb-4 flex flex-col items-center gap-1 select-none">
+        <div class="text-gray-200 dark:text-gray-800 text-[9px] sm:text-[11px] tracking-widest uppercase text-center">
+            Project CiteCase Initiative To Promote INSC Citations
+        </div>
+        <a href="https://tally.so/r/dW0ddq" target="_blank" class="text-gray-300 dark:text-gray-700 text-[9px] sm:text-[10px] tracking-widest uppercase hover:text-blue-500 transition-colors">
+            Share Feedback
+        </a>
     </footer>
 
     <script>
@@ -205,16 +231,16 @@
         ];
 
         const input = document.getElementById('inscInput');
-        const prediction = document.getElementById('predictionText');
+        const suggestionsTop = document.getElementById('suggestions-top');
+        const suggestionsBottom = document.getElementById('suggestions-bottom');
         const resultArea = document.getElementById('resultArea');
         const prefixYear = document.getElementById('prefix-year');
         const prefixInsc = document.getElementById('prefix-insc');
         const instruction = document.getElementById('instruction');
 
-        let currentMatch = null;
-        let isLawMatch = false;
+        let currentMatches = [];
+        let keyboardIndex = -1;
 
-        // Dark Mode Logic
         function toggleDarkMode(e) {
             e.stopPropagation();
             if (document.documentElement.classList.contains('dark')) {
@@ -227,64 +253,126 @@
         }
 
         input.addEventListener('input', (e) => {
-            const val = input.value;
-            const trimmed = val.trim();
-            
-            if (!trimmed) {
-                prediction.textContent = "";
-                currentMatch = null;
+            const val = input.value.trim();
+            clearSuggestions();
+
+            if (!val) {
                 switchToNumberMode();
                 return;
             }
 
-            const isNumeric = /^\d+$/.test(trimmed);
+            const isNumeric = /^\d+$/.test(val);
 
             if (isNumeric) {
                 switchToNumberMode();
-                prediction.textContent = "";
-                currentMatch = null;
             } else {
                 switchToNameMode();
-                
-                // Check Law names/alias first
-                const lawMatch = laws.find(l => 
-                    l.name.toLowerCase().includes(val.toLowerCase()) ||
-                    l.alias.some(a => a.toLowerCase().includes(val.toLowerCase()))
-                );
-
-                if (lawMatch) {
-                    currentMatch = lawMatch;
-                    isLawMatch = true;
-                    prediction.textContent = lawMatch.name;
-                } else {
-                    // Check Judgment names (any part search)
-                    const match = judgments.find(j => 
-                        j.name.toLowerCase().includes(val.toLowerCase())
-                    );
-                    if (match) {
-                        currentMatch = match;
-                        isLawMatch = false;
-                        prediction.textContent = match.name;
-                    } else {
-                        prediction.textContent = "";
-                        currentMatch = null;
-                    }
-                }
+                findPredictions(val);
             }
         });
 
+        function findPredictions(val) {
+            const query = val.toLowerCase();
+            
+            // Priority Scoring
+            const scoredJudgments = judgments.map(j => {
+                const name = j.name.toLowerCase();
+                const petitioner = name.split(' v. ')[0];
+                let score = 100;
+
+                if (petitioner.startsWith(query)) score = 0;
+                else if (petitioner.includes(query)) score = 10;
+                else if (name.startsWith(query)) score = 20;
+                else if (name.includes(query)) score = 30;
+
+                return { ...j, score, type: 'judgment' };
+            }).filter(j => j.score < 100);
+
+            const scoredLaws = laws.map(l => {
+                const name = l.name.toLowerCase();
+                let score = 100;
+                if (name.startsWith(query)) score = 5; 
+                else if (name.includes(query) || l.alias.some(a => a.toLowerCase().includes(query))) score = 15;
+                return { ...l, score, type: 'law' };
+            }).filter(l => l.score < 100);
+
+            currentMatches = [...scoredJudgments, ...scoredLaws].sort((a, b) => a.score - b.score).slice(0, 5);
+
+            if (currentMatches.length > 0) {
+                renderSuggestions(currentMatches);
+            }
+        }
+
+        function renderSuggestions(matches) {
+            const topCount = Math.min(2, matches.length);
+            const top = matches.slice(0, topCount);
+            const bottom = matches.slice(topCount);
+
+            [...top].reverse().forEach((item, idx) => {
+                const actualIndex = (topCount - 1) - idx;
+                const div = createSuggestionDiv(item, actualIndex);
+                suggestionsTop.appendChild(div);
+            });
+
+            bottom.forEach((item, idx) => {
+                const actualIndex = idx + topCount;
+                const div = createSuggestionDiv(item, actualIndex);
+                suggestionsBottom.appendChild(div);
+            });
+            
+            updateKeyboardSelection();
+        }
+
+        function createSuggestionDiv(item, index) {
+            const div = document.createElement("div");
+            div.className = "suggestion-slot";
+            div.id = `suggestion-${index}`;
+            div.textContent = item.name;
+            div.onclick = (e) => {
+                e.stopPropagation();
+                input.value = item.name;
+                performSearch(item.name);
+            };
+            return div;
+        }
+
+        function clearSuggestions() {
+            suggestionsTop.innerHTML = "";
+            suggestionsBottom.innerHTML = "";
+            keyboardIndex = -1;
+            currentMatches = [];
+        }
+
+        function updateKeyboardSelection() {
+            document.querySelectorAll('.suggestion-slot').forEach(el => el.classList.remove('active'));
+            if (keyboardIndex >= 0 && keyboardIndex < currentMatches.length) {
+                const selectedEl = document.getElementById(`suggestion-${keyboardIndex}`);
+                if (selectedEl) selectedEl.classList.add('active');
+            }
+        }
+
         input.addEventListener('keydown', (e) => {
-            if ((e.key === "ArrowRight" || e.key === "Tab") && currentMatch) {
+            if (e.key === "ArrowDown") {
                 e.preventDefault();
-                input.value = currentMatch.name;
-                prediction.textContent = "";
+                if (currentMatches.length > 0) {
+                    keyboardIndex = (keyboardIndex + 1) % currentMatches.length;
+                    updateKeyboardSelection();
+                }
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                if (currentMatches.length > 0) {
+                    keyboardIndex = (keyboardIndex - 1 + currentMatches.length) % currentMatches.length;
+                    updateKeyboardSelection();
+                }
             } else if (e.key === "Enter") {
                 e.preventDefault();
-                const query = input.value.trim();
-                if (currentMatch && !query.toLowerCase().includes(currentMatch.name.toLowerCase())) {
-                    performSearch(currentMatch.name);
-                } else if (query) {
-                    performSearch(query);
+                if (keyboardIndex >= 0 && keyboardIndex < currentMatches.length) {
+                    const selected = currentMatches[keyboardIndex];
+                    input.value = selected.name;
+                    performSearch(selected.name);
+                } else {
+                    const query = input.value.trim();
+                    if (query) performSearch(query);
                 }
             }
         });
@@ -303,7 +391,6 @@
             const val = query.toLowerCase();
             const isNumeric = /^\d+$/.test(query);
             
-            // Try Law search first
             const lawMatch = laws.find(l => 
                 l.name.toLowerCase() === val || 
                 l.name.toLowerCase().includes(val) ||
@@ -312,7 +399,7 @@
 
             if (lawMatch) {
                 renderLawResult(lawMatch);
-                prediction.textContent = "";
+                clearSuggestions();
                 return;
             }
 
@@ -328,7 +415,7 @@
             } else {
                 renderError(query);
             }
-            prediction.textContent = "";
+            clearSuggestions();
         }
 
         function renderLawResult(lawData) {
@@ -341,19 +428,10 @@
                     <h2 class="text-2xl sm:text-3xl md:text-5xl font-semibold text-gray-900 dark:text-gray-100 leading-tight mb-12 italic">
                         ${lawData.name}
                     </h2>
-                    
-                    <a 
-                        href="${lawData.link}" 
-                        target="_blank" 
-                        class="inline-block px-10 sm:px-14 py-4 bg-blue-600 text-white text-[10px] tracking-[0.3em] uppercase font-bold rounded-full hover:bg-blue-700 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-sans"
-                    >
+                    <a href="${lawData.link}" target="_blank" class="inline-block px-10 sm:px-14 py-4 bg-blue-600 text-white text-[10px] tracking-[0.3em] uppercase font-bold rounded-full hover:bg-blue-700 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-sans">
                         Browse All Judgments
                     </a>
-                    
-                    <button 
-                        onclick="resetSearch()" 
-                        class="block w-full mt-20 text-gray-300 dark:text-gray-600 text-[9px] hover:text-gray-900 dark:hover:text-gray-400 transition-colors uppercase tracking-[0.4em] font-bold font-sans"
-                    >
+                    <button onclick="resetSearch()" class="block w-full mt-20 text-gray-300 dark:text-gray-600 text-[9px] hover:text-gray-900 dark:hover:text-gray-400 transition-colors uppercase tracking-[0.4em] font-bold font-sans">
                         Search Again
                     </button>
                 </div>
@@ -377,23 +455,13 @@
                     <div class="text-blue-600 dark:text-blue-400 font-bold text-lg sm:text-xl mb-10 tracking-tight font-sans">
                         ${caseData.citation}
                     </div>
-                    
                     <div class="flex flex-wrap justify-center gap-2 mb-14">
                         ${tagsHtml}
                     </div>
-
-                    <a 
-                        href="${caseData.link}" 
-                        target="_blank" 
-                        class="inline-block px-10 sm:px-14 py-4 bg-gray-900 dark:bg-blue-600 text-white text-[10px] tracking-[0.3em] uppercase font-bold rounded-full hover:bg-black dark:hover:bg-blue-700 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-sans"
-                    >
+                    <a href="${caseData.link}" target="_blank" class="inline-block px-10 sm:px-14 py-4 bg-gray-900 dark:bg-blue-600 text-white text-[10px] tracking-[0.3em] uppercase font-bold rounded-full hover:bg-black dark:hover:bg-blue-700 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 font-sans">
                         Read Headnotes
                     </a>
-                    
-                    <button 
-                        onclick="resetSearch()" 
-                        class="block w-full mt-20 text-gray-300 dark:text-gray-600 text-[9px] hover:text-gray-900 dark:hover:text-gray-400 transition-colors uppercase tracking-[0.4em] font-bold font-sans"
-                    >
+                    <button onclick="resetSearch()" class="block w-full mt-20 text-gray-300 dark:text-gray-600 text-[9px] hover:text-gray-900 dark:hover:text-gray-400 transition-colors uppercase tracking-[0.4em] font-bold font-sans">
                         Start New Search
                     </button>
                 </div>
@@ -405,16 +473,14 @@
             prefixInsc.classList.add('hidden');
             input.parentElement.classList.add('hidden');
             instruction.classList.add('hidden');
+            clearSuggestions();
         }
 
         function renderError(query) {
             resultArea.innerHTML = `
                 <div class="fade-in text-center py-10">
                     <p class="text-gray-400 text-lg sm:text-xl mb-6 italic text-red-500 px-4">Result not found for "${query}"</p>
-                    <button 
-                        onclick="resetSearch()" 
-                        class="text-blue-600 dark:text-blue-400 font-bold hover:underline text-sm uppercase tracking-widest font-sans"
-                    >
+                    <button onclick="resetSearch()" class="text-blue-600 dark:text-blue-400 font-bold hover:underline text-sm uppercase tracking-widest font-sans">
                         Try again
                     </button>
                 </div>
@@ -428,7 +494,7 @@
             instruction.classList.remove('hidden');
             resultArea.innerHTML = '';
             input.value = "";
-            prediction.textContent = "";
+            clearSuggestions();
             switchToNumberMode();
             input.focus();
         }
