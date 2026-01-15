@@ -86,13 +86,28 @@
         }
 
         ::-webkit-scrollbar { display: none; }
+
+        .embed-container {
+            width: 100%;
+            height: 70vh;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+            margin-top: 2rem;
+        }
+        .dark .embed-container {
+            border: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100" onclick="document.getElementById('inscInput').focus()">
+<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 bg-white text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300" onclick="focusSearch()">
 
     <!-- Header Utilities -->
-    <div class="fixed top-6 left-6 sm:top-8 sm:left-8 z-50 flex gap-4">
-        <a href="https://citecase.in/register" target="_blank" class="text-[10px] sm:text-[11px] font-medium tracking-widest uppercase text-gray-400 dark:text-gray-600 hover:text-blue-600 transition-all select-none">
+    <div class="fixed top-6 left-6 sm:top-8 sm:left-8 z-50 flex gap-4 items-center">
+        <button onclick="resetSearch()" class="text-[10px] sm:text-[11px] font-bold tracking-widest uppercase text-blue-600 dark:text-blue-400 transition-all select-none">
+            Search
+        </button>
+        <a href="https://citecase.in/register" target="_blank" class="text-[10px] sm:text-[11px] font-medium tracking-widest uppercase text-gray-400 dark:text-gray-600 hover:text-blue-600 transition-all select-none border-l border-gray-100 dark:border-gray-800 pl-4">
             Support Us
         </a>
     </div>
@@ -103,39 +118,57 @@
         <svg id="moon-icon" class="block dark:hidden w-5 h-5 sm:w-6 sm:h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
     </button>
 
-    <!-- Center Content -->
-    <div class="flex-grow flex flex-col items-center justify-center w-full max-w-5xl">
+    <!-- Main Content Area -->
+    <main class="flex-grow flex flex-col items-center justify-center w-full max-w-5xl pt-24 pb-12">
         
-        <!-- Stacked UI: 2026 -> INSC -> Input -->
-        <div id="searchContainer" class="flex flex-col items-center justify-center transition-all duration-300 w-full">
-            <span id="prefix-year" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-1">2026</span>
-            <span id="prefix-insc" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-0">INSC</span>
-            
-            <div class="input-wrapper">
-                <!-- Predictive options ABOVE -->
-                <div id="suggestions-top" class="flex flex-col items-center w-full mb-0 gap-1 h-10 justify-end"></div>
+        <div id="searchView" class="w-full flex flex-col items-center justify-center">
+            <div id="searchContainer" class="flex flex-col items-center justify-center transition-all duration-300 w-full">
+                <span id="prefix-year" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-1">2026</span>
+                <span id="prefix-insc" class="text-4xl sm:text-5xl md:text-7xl text-gray-800 dark:text-gray-300 font-light tracking-tighter mb-0">INSC</span>
+                
+                <div class="input-wrapper">
+                    <!-- Predictive options ABOVE -->
+                    <div id="suggestions-top" class="flex flex-col items-center w-full mb-0 gap-1 h-10 justify-end"></div>
 
-                <input 
-                    type="text" 
-                    id="inscInput" 
-                    placeholder="1-55" 
-                    class="placeholder-gray-200 dark:placeholder-gray-800 text-blue-600 dark:text-blue-400 text-2xl sm:text-3xl md:text-5xl py-1"
-                    autofocus
-                    autocomplete="off"
-                    spellcheck="false"
-                >
-                <div id="instruction" class="mt-1 text-gray-300 dark:text-gray-600 text-[9px] sm:text-[11px] tracking-[0.3em] uppercase transition-opacity">
-                    Enter Citation Number Or Case / Law Name
+                    <input 
+                        type="text" 
+                        id="inscInput" 
+                        placeholder="1-55" 
+                        class="placeholder-gray-200 dark:placeholder-gray-800 text-blue-600 dark:text-blue-400 text-2xl sm:text-3xl md:text-5xl py-1"
+                        autofocus
+                        autocomplete="off"
+                        spellcheck="false"
+                    >
+                    <div id="instruction" class="mt-1 text-gray-300 dark:text-gray-600 text-[9px] sm:text-[11px] tracking-[0.3em] uppercase transition-opacity">
+                        Enter Citation Number Or Case / Law Name
+                    </div>
+
+                    <!-- Button placed under enter citation etc -->
+                    <button id="btn-law-docs" onclick="toggleLawDocs()" class="mt-4 px-6 py-2 text-[10px] tracking-[0.2em] uppercase font-bold text-gray-400 hover:text-blue-600 border border-transparent hover:border-blue-100 dark:hover:border-blue-900 rounded-full transition-all">
+                        [ Questions of Law ]
+                    </button>
+
+                    <!-- Predictive options BELOW -->
+                    <div id="suggestions-bottom" class="flex flex-col items-center w-full mt-4 gap-1"></div>
                 </div>
+            </div>
 
-                <!-- Predictive options BELOW -->
-                <div id="suggestions-bottom" class="flex flex-col items-center w-full mt-2 gap-1"></div>
+            <!-- Result Display Area -->
+            <div id="resultArea" class="mt-8 flex flex-col items-center w-full"></div>
+
+            <!-- Embed Area (Initially Hidden) -->
+            <div id="docEmbedArea" class="hidden w-full fade-in flex flex-col items-center">
+                <div class="embed-container bg-gray-50 dark:bg-gray-800 shadow-inner">
+                    <iframe 
+                        src="https://docs.google.com/document/d/184tLBrF8JzIWwbiK_NMh9j6ndYz62SsPNRQUzGpNxtw/preview" 
+                        class="w-full h-full border-none"
+                        allow="autoplay">
+                    </iframe>
+                </div>
+                <button onclick="toggleLawDocs()" class="mt-6 text-gray-400 uppercase tracking-widest text-[9px] hover:text-blue-600 transition-colors">Close Legal Points</button>
             </div>
         </div>
-
-        <!-- Result Display -->
-        <div id="resultArea" class="mt-4 flex flex-col items-center w-full"></div>
-    </div>
+    </main>
 
     <!-- Initiative Footer -->
     <footer class="pb-4 flex flex-col items-center gap-1 select-none">
@@ -184,7 +217,7 @@
             {"id": 48, "name": "Kishorilal v. Gopal", "citation": "2026 INSC 48", "cat": "Civil", "link": "https://www.caseciter.com/kishorilal-d-v-gopal-2026-insc-48-cpc-abatement-specific-performance-suit-res-judicata-lis-pendens/"},
             {"id": 47, "name": "State of Uttar Pradesh v. Anurudh", "citation": "2026 INSC 47", "cat": "Criminal", "link": "https://www.caseciter.com/state-of-uttar-propadesh-v-anurudh-2026-insc-47-pocso-bail-medical-age-determination/"},
             {"id": 46, "name": "Jindal Equipment Leasing Consultancy Services Ltd v. CIT", "citation": "2026 INSC 46", "cat": "Taxation", "link": "https://www.caseciter.com/jindal-equipment-leasing-consultancy-services-ltd-v-cit-2026-insc-46/"},
-            {"id": 45, "name": "Shrikrishna v. State of Madhya Pradesh", "citation": "2026 INSC 45", "cat": "Criminal", "link": "https://www.caseciter.com/shrikrishna-v-state-of-madhya-pradesh-2026-insc-45-ipc-murder-culpable-homicide/"},
+            {"id": 45, "name": "Shrikrishna v. State of Madhya Pradesh", "citation": "2026 INSC 45", "cat": "Criminal", "link": "https://www.caseciter.com/shrikrishna-v-state-of-madhya-pradesh-2026-insc-45-ipc-murder-culpome-homicide/"},
             {"id": 44, "name": "X v. State of Uttar Pradesh", "citation": "2026 INSC 44", "cat": "Criminal", "link": "https://www.caseciter.com/x-v-state-of-uttar-pradesh-another-2026-insc-44/"},
             {"id": 43, "name": "Ultratech Cement Ltd. v. State of Gujarat", "citation": "2026 INSC 43", "cat": "Taxation", "link": "https://www.caseciter.com/ultratech-cement-ltd-v-state-of-gujarat-2026-insc-43-gujarat-motor-vehicles-tax-act-article-265-constitution-construction-equipment-vehicle/"},
             {"id": 42, "name": "Yerram Vijay Kumar v. State of Telangana", "citation": "2026 INSC 42", "cat": "Criminal", "link": "https://www.caseciter.com/yerram-vijay-kumar-v-state-of-telangana-2026-insc-42-s-212-companies-act-cognizance-taking/"},
@@ -237,6 +270,8 @@
         const prefixYear = document.getElementById('prefix-year');
         const prefixInsc = document.getElementById('prefix-insc');
         const instruction = document.getElementById('instruction');
+        const docEmbedArea = document.getElementById('docEmbedArea');
+        const btnLawDocs = document.getElementById('btn-law-docs');
 
         let currentMatches = [];
         let keyboardIndex = -1;
@@ -249,6 +284,27 @@
             } else {
                 document.documentElement.classList.add('dark');
                 localStorage.theme = 'dark';
+            }
+        }
+
+        function focusSearch() {
+            input.focus();
+        }
+
+        function toggleLawDocs() {
+            const isHidden = docEmbedArea.classList.contains('hidden');
+            if (isHidden) {
+                docEmbedArea.classList.remove('hidden');
+                btnLawDocs.textContent = "[ Close Legal Points ]";
+                btnLawDocs.classList.add('text-blue-600', 'border-blue-100', 'dark:border-blue-900');
+                // Scroll to embed
+                setTimeout(() => {
+                    docEmbedArea.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            } else {
+                docEmbedArea.classList.add('hidden');
+                btnLawDocs.textContent = "[ Questions of Law ]";
+                btnLawDocs.classList.remove('text-blue-600', 'border-blue-100', 'dark:border-blue-900');
             }
         }
 
@@ -274,7 +330,6 @@
         function findPredictions(val) {
             const query = val.toLowerCase();
             
-            // Priority Scoring
             const scoredJudgments = judgments.map(j => {
                 const name = j.name.toLowerCase();
                 const petitioner = name.split(' v. ')[0];
@@ -473,6 +528,7 @@
             prefixInsc.classList.add('hidden');
             input.parentElement.classList.add('hidden');
             instruction.classList.add('hidden');
+            btnLawDocs.classList.add('hidden');
             clearSuggestions();
         }
 
@@ -492,6 +548,10 @@
             prefixInsc.classList.remove('hidden');
             input.parentElement.classList.remove('hidden');
             instruction.classList.remove('hidden');
+            btnLawDocs.classList.remove('hidden');
+            docEmbedArea.classList.add('hidden');
+            btnLawDocs.textContent = "[ Questions of Law ]";
+            btnLawDocs.classList.remove('text-blue-600', 'border-blue-100', 'dark:border-blue-900');
             resultArea.innerHTML = '';
             input.value = "";
             clearSuggestions();
