@@ -10,13 +10,14 @@
             background-color: #ffffff;
             font-family: Georgia, serif;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
         }
         .iframe-container {
-            /* Fixed height for static first page view - reduced to fit standard screen better */
             width: 100%;
             max-width: 800px;
-            height: 900px; 
+            height: 1000px; 
             position: relative;
             background: white;
             overflow: hidden;
@@ -77,13 +78,27 @@
         }
     </style>
 </head>
-<body class="bg-white flex flex-col items-center">
+<body class="bg-white">
 
-    <!-- Main Content Area -->
-    <div class="w-full flex flex-col items-center">
+    <!-- Top Navigation Area -->
+    <nav class="w-full flex justify-end p-6 md:p-8">
+        <a 
+            href="https://citecase.in/about-us" 
+            target="_blank" 
+            class="group flex items-center gap-2 bg-white border border-gray-100 rounded-lg px-4 py-2 shadow-sm hover:border-blue-400 hover:shadow-md transition-all active:scale-95"
+        >
+            <span class="text-[11px] text-gray-500 group-hover:text-blue-600 uppercase font-sans font-bold tracking-widest">
+                Support Us
+            </span>
+            <svg class="text-gray-300 group-hover:text-blue-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="flex-grow flex flex-col items-center w-full">
         
         <!-- Main Search View -->
-        <div id="searchView" class="w-full max-w-2xl mt-8 md:mt-12 px-6 text-center fade-transition">
+        <div id="searchView" class="w-full max-w-2xl mt-4 md:mt-8 px-6 text-center fade-transition">
             <div class="flex flex-col items-center select-none leading-none">
                 <span class="text-6xl md:text-7xl font-bold text-black tracking-tight">2026</span>
                 <span class="text-6xl md:text-7xl font-bold text-black tracking-tight mt-1">INSC</span>
@@ -103,6 +118,7 @@
 
             <!-- Action Buttons Area -->
             <div class="mt-8 flex flex-col items-center gap-4">
+                <!-- What's This Box -->
                 <div class="inline-block">
                     <div class="bg-white border border-gray-100 rounded p-1 shadow-sm">
                         <button onclick="toggleInfo()" class="info-pill px-3 py-1 text-gray-400 hover:text-black uppercase font-sans font-bold flex items-center gap-2">
@@ -112,16 +128,19 @@
                     </div>
                 </div>
 
-                <button 
-                    onclick="showListView()"
-                    class="text-[11px] text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-[0.15em] font-sans font-bold border-b border-blue-50 pb-0.5"
-                >
-                    List Of Latest SC Judgments
-                </button>
+                <!-- Latest SC Judgments Box (New Style) -->
+                <div class="inline-block">
+                    <div class="bg-white border border-gray-100 rounded p-1 shadow-sm">
+                        <button onclick="showListView()" class="info-pill px-3 py-1 text-blue-600 hover:text-blue-800 uppercase font-sans font-bold flex items-center gap-2">
+                            <span>Latest Supreme Court Judgments</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <!-- Collapsible Info Content -->
-            <div id="infoContent" class="hidden max-w-sm mx-auto mt-4 text-left p-4 bg-gray-50/50 border border-gray-100 rounded-lg text-sm leading-relaxed text-gray-700">
+            <div id="infoContent" class="hidden max-w-sm mx-auto mt-4 text-left p-4 bg-gray-50/50 border border-gray-100 rounded-lg text-sm leading-relaxed text-gray-700 shadow-inner">
                 <p>If you know the neutral citation number (INSC) of a Supreme Court case and you want to read the judgment or our notes, you can use this tool.</p>
                 <p class="mt-2 italic text-xs">To read our notes, you must be a subscriber to our <strong>Project CiteCase</strong>. Free access to SCI judgments is available through <strong>LawLens</strong>.</p>
                 <div class="mt-4 flex justify-center">
@@ -133,16 +152,16 @@
         </div>
 
         <!-- List View View (Next Page) -->
-        <div id="listView" class="w-full hidden-view fade-transition px-4 flex flex-col items-center pt-8 pb-0">
+        <div id="listView" class="w-full hidden-view fade-transition px-4 flex flex-col items-center pt-8 pb-12">
             <button 
                 onclick="hideListView()"
-                class="mb-4 flex items-center gap-2 text-[10px] text-gray-400 hover:text-black uppercase tracking-widest font-sans font-bold"
+                class="mb-6 flex items-center gap-2 text-[10px] text-gray-400 hover:text-black uppercase tracking-widest font-sans font-bold"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 Back to Search
             </button>
 
-            <h2 class="text-xl font-bold text-black mb-4">Latest SC Judgments - 2026</h2>
+            <h2 class="text-xl font-bold text-black mb-6">Latest Supreme Court Judgments - 2026</h2>
 
             <div class="w-full flex justify-center">
                 <div class="iframe-container rounded-sm shadow-sm border border-gray-50">
@@ -157,26 +176,10 @@
         </div>
     </div>
 
-    <!-- Footer Section -->
-    <div class="w-full bg-white pt-12 pb-12">
-        <footer class="text-center mb-6">
-            <p class="text-[11px] uppercase tracking-[0.4em] text-gray-400 font-sans font-bold">A CiteCase Initiative</p>
-        </footer>
-        
-        <!-- Support Us hyperlinked box -->
-        <div class="flex justify-center px-6">
-            <a 
-                href="https://citecase.in/about-us" 
-                target="_blank" 
-                class="group flex items-center gap-4 bg-white border border-gray-200 rounded-xl px-10 py-5 shadow-sm hover:border-blue-400 hover:shadow-md transition-all active:scale-95"
-            >
-                <span class="text-[13px] text-gray-500 group-hover:text-blue-600 uppercase font-sans font-bold tracking-widest">
-                    Support Us: <span class="text-blue-600"> </span>
-                </span>
-                <svg class="text-gray-300 group-hover:text-blue-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-        </div>
-    </div>
+    <!-- Minimal Bottom Branding -->
+    <footer class="w-full py-8 flex justify-center">
+        <p class="text-[10px] uppercase tracking-[0.4em] text-gray-300 font-sans font-bold">A CiteCase Initiative</p>
+    </footer>
 
     <script>
         const caseDatabase = {
