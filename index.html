@@ -11,10 +11,10 @@
             font-family: Georgia, serif;
         }
         .iframe-container {
-            /* Height fixed to approximately one A4 page in preview mode */
-            height: 1050px; 
+            /* Responsive aspect ratio ensures the first page is fully visible on all screens */
             width: 100%;
-            max-width: 900px;
+            max-width: 850px;
+            aspect-ratio: 1 / 1.35; 
             position: relative;
             overflow: hidden;
             background: white;
@@ -82,7 +82,7 @@
         <div class="mt-10 flex justify-center">
             <!-- What's This? Box -->
             <div class="inline-block">
-                <div class="bg-white border border-gray-50 rounded p-1">
+                <div class="bg-white border border-gray-100 rounded p-1">
                     <button 
                         onclick="toggleInfo()"
                         class="info-pill px-3 py-1 text-gray-400 hover:text-black uppercase font-sans font-bold flex items-center gap-2"
@@ -95,7 +95,7 @@
         </div>
         
         <!-- Hidden Info Content -->
-        <div id="infoContent" class="hidden max-w-sm mx-auto mt-4 text-left p-5 bg-white border border-gray-50 rounded-lg text-sm leading-relaxed text-gray-700">
+        <div id="infoContent" class="hidden max-w-sm mx-auto mt-4 text-left p-5 bg-white border border-gray-100 shadow-xl rounded-lg text-sm leading-relaxed text-gray-700">
             <p>
                 If you know the neutral citation number (INSC) of a Supreme Court case and you want to read the judgment or our notes on that, you can use this tool. 
             </p>
@@ -113,9 +113,9 @@
     </div>
 
     <!-- Embedding Section (Visible by default, sized to first page) -->
-    <main id="docSection" class="w-full max-w-6xl px-6 flex flex-col items-center pb-32">
+    <main id="docSection" class="w-full max-w-6xl px-4 flex flex-col items-center pb-32">
         <div class="pt-12 w-full flex justify-center">
-            <div class="iframe-container">
+            <div class="iframe-container rounded-sm border-0">
                 <iframe 
                     id="docFrame" 
                     src="https://docs.google.com/document/d/1RUmZrgR3wka0nOtjScBsDLuCv8KLTLT5zejlG4a_P5k/preview" 
@@ -137,7 +137,7 @@
             <a 
                 href="https://citecase.in/about-us" 
                 target="_blank" 
-                class="bg-white border border-gray-50 rounded p-1 info-pill px-4 py-2 text-gray-400 hover:text-blue-600 uppercase font-sans font-bold flex items-center gap-2"
+                class="bg-white border border-gray-200 rounded p-1 info-pill px-4 py-2 text-gray-400 hover:text-blue-600 uppercase font-sans font-bold flex items-center gap-2"
             >
                 <span>Support Us</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
