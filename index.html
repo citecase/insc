@@ -11,8 +11,13 @@
             font-family: Georgia, serif;
         }
         .iframe-container {
-            height: calc(100vh - 400px);
+            /* Height fixed to approximately one A4 page in preview mode */
+            height: 1050px; 
             width: 100%;
+            max-width: 900px;
+            position: relative;
+            overflow: hidden;
+            background: white;
         }
         .hidden-content {
             display: none;
@@ -42,6 +47,13 @@
             cursor: pointer;
             transition: all 0.2s;
         }
+        /* Disable interaction and scrolling inside iframe */
+        #docFrame {
+            pointer-events: none;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
@@ -70,7 +82,7 @@
         <div class="mt-10 flex justify-center">
             <!-- What's This? Box -->
             <div class="inline-block">
-                <div class="bg-gray-50 border border-gray-100 rounded p-1">
+                <div class="bg-white border border-gray-100 rounded p-1">
                     <button 
                         onclick="toggleInfo()"
                         class="info-pill px-3 py-1 text-gray-400 hover:text-black uppercase font-sans font-bold flex items-center gap-2"
@@ -100,42 +112,32 @@
         </div>
     </div>
 
-    <!-- Main List Toggle -->
-    <div class="mt-12">
-        <button 
-            onclick="toggleDoc()" 
-            id="toggleBtn"
-            class="text-[11px] text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-[0.1em] font-sans font-bold border-b border-blue-100"
-        >
-            <span id="toggleText">Supreme Court Judgments List - 2026</span>
-        </button>
-    </div>
-
-    <!-- Embedding Section (Hidden by default) -->
-    <main id="docSection" class="w-full max-w-5xl px-6 hidden-content pb-32">
-        <div class="border-t border-gray-100 pt-12">
-            <div class="iframe-container rounded-lg overflow-hidden border border-gray-100 shadow-2xl">
+    <!-- Embedding Section (Visible by default, sized to first page) -->
+    <main id="docSection" class="w-full max-w-6xl px-6 flex flex-col items-center pb-32">
+        <div class="pt-12 w-full flex justify-center">
+            <div class="iframe-container">
                 <iframe 
                     id="docFrame" 
                     src="https://docs.google.com/document/d/1RUmZrgR3wka0nOtjScBsDLuCv8KLTLT5zejlG4a_P5k/preview" 
-                    class="w-full h-full border-0"
+                    frameborder="0"
+                    scrolling="no"
                 ></iframe>
             </div>
         </div>
     </main>
 
     <!-- Footer Area -->
-    <footer class="mt-auto w-full pt-12 pb-6 border-t border-gray-50 text-center bg-gray-50/50">
+    <footer class="mt-auto w-full pt-12 pb-6 border-t border-gray-50 text-center bg-white">
         <p class="text-[11px] uppercase tracking-[0.4em] text-gray-400 font-sans font-bold">Project CiteCase Initiative</p>
     </footer>
     
     <!-- Support Us Section below Footer -->
-    <div class="w-full pb-10 text-center bg-gray-50/50">
+    <div class="w-full pb-10 text-center bg-white">
         <div class="inline-block">
             <a 
                 href="https://citecase.in/about-us" 
                 target="_blank" 
-                class="bg-white border border-gray-200 rounded p-1 info-pill px-4 py-2 text-gray-400 hover:text-blue-600 uppercase font-sans font-bold flex items-center gap-2 shadow-sm"
+                class="bg-white border border-gray-100 rounded p-1 info-pill px-4 py-2 text-gray-400 hover:text-blue-600 uppercase font-sans font-bold flex items-center gap-2 shadow-sm"
             >
                 <span>Support Us</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -188,7 +190,7 @@
             42: "https://www.caseciter.com/yerram-vijay-kumar-v-state-of-telangana-2026-insc-42-s-212-companies-act-cognizance-taking/",
             43: "https://www.caseciter.com/ultratech-cement-ltd-v-state-of-gujarat-2026-insc-43-gujarat-motor-vehicles-tax-act-article-265-constitution-construction-equipment-vehicle/",
             44: "https://www.caseciter.com/x-v-state-of-uttar-pradesh-another-2026-insc-44/",
-            45: "https://www.caseciter.com/shrikrishna-v-state-of-madhya-pradesh-2026-insc-45-ipc-murder-culpable-homicide/",
+            45: "https://www.caseciter.com/shrikrishna-v-state-maxhya-pradesh-2026-insc-45-ipc-murder-culpable-homicide/",
             47: "https://www.google.com/search?q=https://www.caseciter.com/state-of-uttar-propadesh-v-anurudh-2026-insc-47-pocso-bail-medical-age-determination/",
             48: "https://www.caseciter.com/kishorilal-d-v-gopal-2026-insc-48-cpc-abatement-specific-performance-suit-res-judicata-lis-pendens/",
             50: "https://www.caseciter.com/ravi-shankar-bhushan-v-union-of-india-2026-insc-50/#gsc.tab=0",
@@ -230,19 +232,6 @@
             } else {
                 content.classList.add('hidden');
                 arrow.style.transform = 'rotate(0deg)';
-            }
-        }
-
-        function toggleDoc() {
-            const section = document.getElementById('docSection');
-            const btnText = document.getElementById('toggleText');
-            if (section.classList.contains('hidden-content')) {
-                section.classList.remove('hidden-content');
-                btnText.innerText = 'Hide Judgments List';
-                setTimeout(() => { section.scrollIntoView({ behavior: 'smooth' }); }, 100);
-            } else {
-                section.classList.add('hidden-content');
-                btnText.innerText = 'Supreme Court Judgments List - 2026';
             }
         }
 
