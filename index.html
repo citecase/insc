@@ -11,12 +11,12 @@
             font-family: Georgia, serif;
         }
         .iframe-container {
-            /* Responsive aspect ratio ensures the first page is fully visible on all screens */
             width: 100%;
             max-width: 850px;
-            aspect-ratio: 1 / 1.35; 
+            /* Changed from aspect-ratio to a fixed large height to allow scrolling */
+            height: 80vh; 
+            min-height: 600px;
             position: relative;
-            overflow: hidden;
             background: white;
         }
         .hidden-content {
@@ -40,27 +40,37 @@
             width: 150px;
             background: #000;
         }
-        /* Small Box Styles */
         .info-pill {
             font-size: 11px;
             letter-spacing: 0.05em;
             cursor: pointer;
             transition: all 0.2s;
         }
-        /* Disable interaction and scrolling inside iframe */
+        /* Re-enabled pointer events to allow scrolling */
         #docFrame {
-            pointer-events: none;
-            overflow: hidden;
+            pointer-events: auto;
             width: 100%;
             height: 100%;
+        }
+        .case-grid-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .case-grid-item:hover {
+            background-color: #f3f4f6;
+            color: #2563eb;
+            border-color: #e5e7eb;
+        }
+        .fade-transition {
+            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center">
 
-    <!-- Minimal Search Section -->
-    <div class="w-full max-w-2xl mt-24 px-6 text-center">
-        <!-- Vertical Stacked Labels -->
+    <!-- Search Section -->
+    <div id="searchSection" class="w-full max-w-2xl mt-24 px-6 text-center fade-transition">
         <div class="flex flex-col items-center select-none leading-none">
             <span class="text-7xl font-bold text-black tracking-tight">2026</span>
             <span class="text-7xl font-bold text-black tracking-tight mt-2">INSC</span>
@@ -72,21 +82,20 @@
                 id="caseInput" 
                 placeholder="0" 
                 autofocus
+                autocomplete="off"
                 class="w-full text-center text-7xl font-bold py-2 bg-transparent border-none focus:ring-0 outline-none text-blue-700 placeholder-gray-100 transition-all"
             >
             <div class="input-focus-line"></div>
+            
+            <div id="numberGrid" class="mt-8 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 w-full max-w-md mx-auto hidden"></div>
+
             <p class="mt-8 text-[10px] uppercase tracking-[0.5em] text-gray-400 font-sans font-bold">Press Enter</p>
         </div>
 
-        <!-- Small Action Boxes -->
         <div class="mt-10 flex justify-center">
-            <!-- What's This? Box -->
             <div class="inline-block">
-                <div class="bg-white border border-gray-100 rounded p-1">
-                    <button 
-                        onclick="toggleInfo()"
-                        class="info-pill px-3 py-1 text-gray-400 hover:text-black uppercase font-sans font-bold flex items-center gap-2"
-                    >
+                <div class="bg-white border border-gray-100 rounded p-1 shadow-sm">
+                    <button onclick="toggleInfo()" class="info-pill px-3 py-1 text-gray-400 hover:text-black uppercase font-sans font-bold flex items-center gap-2">
                         <span>What’s This?</span>
                         <svg id="infoArrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="transition-transform"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
@@ -94,51 +103,51 @@
             </div>
         </div>
         
-        <!-- Hidden Info Content -->
-        <div id="infoContent" class="hidden max-w-sm mx-auto mt-4 text-left p-5 bg-white border border-gray-100 shadow-xl rounded-lg text-sm leading-relaxed text-gray-700">
-            <p>
-                If you know the neutral citation number (INSC) of a Supreme Court case and you want to read the judgment or our notes on that, you can use this tool. 
-            </p>
-            <p class="mt-3 italic">
-                To read our notes, you must be a subscriber to our <strong>Project CiteCase</strong>. However, we allow free access to original SCI judgments through <strong>LawLens</strong>.
-            </p>
+        <div id="infoContent" class="hidden max-w-sm mx-auto mt-4 text-left p-5 bg-white border border-gray-100 rounded-lg text-sm leading-relaxed text-gray-700">
+            <p>If you know the neutral citation number (INSC) of a Supreme Court case and you want to read the judgment or our notes, you can use this tool.</p>
+            <p class="mt-3 italic text-xs">To read our notes, you must be a subscriber to <strong>Project CiteCase</strong>. Free access to SCI judgments is available through <strong>LawLens</strong>.</p>
             <div class="mt-5 flex justify-center">
-                <a href="https://citecase.in/register" target="_blank" class="bg-black text-white font-sans font-bold py-2 px-6 rounded text-[10px] uppercase tracking-widest transition-all">Subscribe</a>
+                <a href="https://citecase.in/register" target="_blank" class="bg-black text-white font-sans font-bold py-2 px-6 rounded text-[10px] uppercase tracking-widest">Subscribe</a>
             </div>
         </div>
         
-        <div id="errorMsg" class="mt-4 text-red-500 text-[10px] uppercase tracking-widest font-sans font-bold opacity-0 transition-opacity">
-            Invalid Entry
+        <div id="errorMsg" class="mt-4 text-red-500 text-[10px] uppercase tracking-widest font-sans font-bold opacity-0 transition-opacity">Invalid Entry</div>
+    </div>
+
+    <!-- Result Section (Next Page) -->
+    <div id="resultSection" class="hidden w-full max-w-2xl mt-32 px-6 text-center fade-transition opacity-0 transform translate-y-4">
+        <div class="flex flex-col items-center select-none leading-none">
+            <span class="text-3xl font-bold text-gray-400 tracking-tight">2026 INSC</span>
+            <span id="resultNumber" class="text-9xl font-bold text-green-600 tracking-tighter mt-4">57</span>
+        </div>
+        
+        <div class="mt-12 mb-8">
+            <h2 id="caseName" class="text-xl font-bold text-gray-800 italic mb-6 leading-relaxed min-h-[3em]"></h2>
+            <div class="flex flex-col items-center gap-4">
+                <a id="judgmentLink" href="#" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white font-sans font-bold py-3 px-10 rounded shadow-md transition-all uppercase text-xs tracking-widest">Read Judgment</a>
+                <button onclick="resetSearch()" class="text-[10px] text-gray-400 hover:text-black uppercase tracking-widest font-sans font-bold mt-4 border-b border-transparent hover:border-gray-200 pb-1">Search Another</button>
+            </div>
         </div>
     </div>
 
-    <!-- Embedding Section (Visible by default, sized to first page) -->
-    <main id="docSection" class="w-full max-w-6xl px-4 flex flex-col items-center pb-32">
-        <div class="pt-12 w-full flex justify-center">
+    <!-- Embedding Section (Visible only on Search Page) -->
+    <main id="docSection" class="w-full max-w-6xl px-4 flex flex-col items-center pb-32 mt-12">
+        <div class="w-full flex justify-center">
             <div class="iframe-container rounded-sm border-0">
-                <iframe 
-                    id="docFrame" 
-                    src="https://docs.google.com/document/d/1RUmZrgR3wka0nOtjScBsDLuCv8KLTLT5zejlG4a_P5k/preview" 
-                    frameborder="0"
-                    scrolling="yes"
-                ></iframe>
+                <!-- Re-enabled scrolling and removed interaction blockage -->
+                <iframe id="docFrame" src="https://docs.google.com/document/d/1RUmZrgR3wka0nOtjScBsDLuCv8KLTLT5zejlG4a_P5k/preview" frameborder="0"></iframe>
             </div>
         </div>
     </main>
 
     <!-- Footer Area -->
-    <footer class="mt-auto w-full pt-12 pb-6 text-center bg-white">
+    <footer class="mt-auto w-full pt-12 pb-6 text-center bg-white border-t border-gray-50">
         <p class="text-[11px] uppercase tracking-[0.4em] text-gray-400 font-sans font-bold">Project CiteCase Initiative</p>
     </footer>
     
-    <!-- Support Us Section below Footer -->
     <div class="w-full pb-10 text-center bg-white">
         <div class="inline-block">
-            <a 
-                href="https://citecase.in/about-us" 
-                target="_blank" 
-                class="bg-white border border-gray-200 rounded p-1 info-pill px-4 py-2 text-gray-400 hover:text-blue-600 uppercase font-sans font-bold flex items-center gap-2"
-            >
+            <a href="https://citecase.in/about-us" target="_blank" class="bg-white border border-gray-200 rounded p-1 info-pill px-4 py-2 text-gray-400 hover:text-blue-600 uppercase font-sans font-bold flex items-center gap-2">
                 <span>Support Us</span>
                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             </a>
@@ -147,91 +156,98 @@
 
     <script>
         const caseDatabase = {
-            1: "https://www.caseciter.com/adani-power-ltd-vs-union-of-india-2026-insc-1-precedent-delegated-legislation-tax-levy/",
-            2: "https://www.caseciter.com/gulfisha-fatima-vs-state-govt-of-nct-of-delhi-2025-insc-1-delhi-riots-cases/#gsc.tab=0",
-            3: "https://www.google.com/search?q=https://www.caseciter.com/anjani-singh-v-state-of-the-uttar-pradesh-2026-insc-3-ipc-murder-case-acquittal/",
-            4: "https://www.caseciter.com/bhagheeratha-engineering-ltd-vs-state-of-kerala-2026-insc-4-arbitration-act/",
-            5: "https://www.caseciter.com/motilal-oswal-financial-service-limited-vs-santosh-cordeiro-2026-insc-5-arbitration-act/",
-            6: "https://www.caseciter.com/bhadra-international-india-pvt-ltd-vs-airports-authority-of-india-2026-insc-6/",
-            7: "https://www.google.com/search?q=https://www.caseciter.com/nirbhay-singh-suliya-vs-state-of-madhya-phadesh-judiciary-disciplinary-proceedings-wrong-order/",
-            8: "https://www.caseciter.com/nak-engineering-company-pvt-ltd-v-tarun-keshrichand-shah-and-ors-2026-insc-8-cpc-dominus-litis-necessary-proper-party/",
-            9: "https://www.caseciter.com/panganti-vijaya-v-united-india-insurance-co-ltd-2026-insc-9-workmans-compensation-act/",
-            10: "https://www.caseciter.com/dharmendra-sharma-v-m-arunmozhi-2026-insc-10-contempt/",
-            11: "https://www.google.com/search?q=https://www.caseciter.com/subhash-aggarwal-v-mahender-pal-class-2026-insc-11-specific-relief-act-equity/",
-            12: "https://www.caseciter.com/arvind-dham-v-directorate-of-enforcement-2026-insc-12-c/",
-            13: "https://www.google.com/search?q=https://www.caseciter.com/pratima-das-v-state-of-himachal-phadesh-2026-insc-13/",
-            14: "https://www.caseciter.com/uv-arc-v-electrosteel-castings-2026-insc-14-contract-act-see-to-it-guarantee/",
-            15: "https://www.caseciter.com/union-of-india-v-g-kiran-2026-insc-15-reservation-upsc-rules/",
-            16: "https://www.caseciter.com/kadirkhan-ahmedkhan-pathan-v-maharashtra-state-warehousing-corporation-202/",
-            18: "https://www.google.com/search?q=https://www.caseciter.com/ifgl-refractories-ltd-v-orissa-state-financial-corporation-2026-insc-18-art-14-constitution-arbitrariness-promissory-estoppel-bureaucuratic-lethargy/",
-            19: "https://www.caseciter.com/commissioner-of-customs-import-v-welkin-foods-2026-insc-19-common-or-trade-parlance-test/",
-            20: "https://www.caseciter.com/guru-pada-bera-vs-binod-kumar-2026-insc-20/#gsc.tab=0",
-            21: "https://www.caseciter.com/dalsukbhai-bachubhai-satasia-v-state-of-gujarat-others-2026-insc-21-urban-land-ceiling-and-regulation-act/",
-            22: "https://www.google.com/search?q=https://www.caseciter.com/golden-food-products-india-v-state-of-uttar-propadesh-2026-insc-22-auction-expectation-of-higher-bid/",
-            23: "https://www.caseciter.com/jaswinder-singh-shinder-singh-v-state-of-punjab-2026-insc-23/#gsc.tab=0",
-            24: "https://www.caseciter.com/abhay-kumar-patel-v-state-of-bihar-2026-insc-24-public-employment-recruitment-retrospective-amendment-of-rules/",
-            25: "https://www.caseciter.com/state-nct-of-delhi-v-khimji-bhai-jadeja-2026-insc-25-crpc-bnss-triple-tests-same-transaction-consolidation-of-firs/",
-            26: "https://www.caseciter.com/divjot-sekhon-v-state-of-punjab-and-others-2026-insc-26-mbbs-admission-policy-decision-judicial-review/",
-            27: "https://www.caseciter.com/s-nagesh-v-shobha-s-aradhya-2026-insc-27-ni-act-delay-condonation-taking-cognizance/",
-            28: "https://www.caseciter.com/shalini-bhateja-vs-state-of-u-p-2026-insc-28/",
-            29: "https://www.caseciter.com/s-shakul-hameed-v-tamil-nadu-state-transport-corporation-ltd-2026-insc-29-motor-accident-compensation/",
-            30: "https://www.caseciter.com/prasanna-kasini-v-state-of-telangana-anr-2026-insc-30/",
-            31: "https://www.caseciter.com/karnataka-lokayuktha-bagalkote-district-bagalkot-vs-chandrashekar-2026-insc-31-criminal-case-disciplinary-proceedings/",
-            32: "https://www.caseciter.com/regenta-hotels-private-limited-v-hotel-grand-centre-point-2026-insc-32-ss-9-21-arbitration-act/",
-            33: "https://www.caseciter.com/the-property-company-p-ltd-v-rohinten-daddy-mazda-neutral-citation-2026-insc-33/",
-            34: "https://www.caseciter.com/jan-de-nul-dredging-india-pvt-ltd-v-tuticorin-port-trust-2026-insc-34-ss-34-37-arbitration-act/",
-            35: "https://www.caseciter.com/muslimveetil-chalakkal-ahammed-haji-v-sakeena-beevi-neutral-citation-2026-insc-35/",
-            36: "https://www.caseciter.com/md-imran-d-c-guddu-v-state-of-jharkhand-2026-insc-36-s-319-crpc-bail-tests/",
-            37: "https://www.caseciter.com/joint-director-rayalaseema-acb-a-p-v-dayam-peda-ranga-rao-2026-insc-37-crpc/",
-            38: "https://www.google.com/search?q=https://www.caseciter.com/state-of-uttar-propadesh-v-bhawana-mishra-2026-insc-38-educational-courses-admission-legitimate-expectation/",
-            39: "https://www.caseciter.com/c-s-prasad-vs-c-satyakumar-and-others-2026-insc-39-s-482-crpc-quashing-civil-suit-delay/",
-            40: "https://www.caseciter.com/sumit-bansal-v-mgi-developers-and-promoters-2026-insc-40-ni-act-cheque-bounce-multiple-cheques/",
-            41: "https://www.caseciter.com/roshini-devi-v-state-of-telangana-2026-insc-41-preventive-detention-bail-apprehension/",
-            42: "https://www.caseciter.com/yerram-vijay-kumar-v-state-of-telangana-2026-insc-42-s-212-companies-act-cognizance-taking/",
-            43: "https://www.caseciter.com/ultratech-cement-ltd-v-state-of-gujarat-2026-insc-43-gujarat-motor-vehicles-tax-act-article-265-constitution-construction-equipment-vehicle/",
-            44: "https://www.caseciter.com/x-v-state-of-uttar-pradesh-another-2026-insc-44/",
-            45: "https://www.caseciter.com/shrikrishna-v-state-maxhya-pradesh-2026-insc-45-ipc-murder-culpable-homicide/",
-            47: "https://www.caseciter.com/state-of-uttar-pradesh-v-anurudh-2026-insc-47-pocso-bail-medical-age-determination/#gsc.tab=0",
-            48: "https://www.caseciter.com/kishorilal-d-v-gopal-2026-insc-48-cpc-abatement-specific-performance-suit-res-judicata-lis-pendens/",
-            50: "https://www.caseciter.com/ravi-shankar-bhushan-v-union-of-india-2026-insc-50/#gsc.tab=0",
-            51: "https://www.caseciter.com/ansal-crown-heights-flat-buyers-association-v-ansal-crown-infrabuild-pvt-ltd-2026-insc-51-consumer-protection-act-companies-act-ibc/",
-            52: "https://www.caseciter.com/alka-shrirang_chavan-v-hemchandra-rajaram-bhonsale-2026-insc-52-specific-relief-act-transfer-of-property-act-lis-pendens/",
-            53: "https://www.caseciter.com/sujata-bora-v-coal-india-limited-2026-insc-53-rpwd-act-corporate-social-responsibility-reasonable-accommodation/#gsc.tab=0",
-            54: "https://www.caseciter.com/kanchana-rai-v-geeta-sharma-2026-insc-54-hindu-adoptions-and-maintenance-act/#gsc.tab=0",
-            55: "https://www.caseciter.com/centre-for-public-interest-litigation-v-union-of-india-2026-insc-55-s-17-a-prevention-of-corruption-act-constitutional-validity-split-verdict/#gsc.tab=0",
+            1: { name: "Adani Power Ltd. vs Union of India", link: "https://www.caseciter.com/adani-power-ltd-vs-union-of-india-2026-insc-1-precedent-delegated-legislation-tax-levy/" },
+            2: { name: "Gulfisha Fatima vs State", link: "https://www.caseciter.com/gulfisha-fatima-vs-state-govt-of-nct-of-delhi-2025-insc-1-delhi-riots-cases/#gsc.tab=0" },
+            3: { name: "Anjani Singh v. State of Uttar Pradesh", link: "https://www.google.com/search?q=https://www.caseciter.com/anjani-singh-v-state-of-the-uttar-pradesh-2026-insc-3-ipc-murder-case-acquittal/" },
+            4: { name: "Bhagheeratha Engineering Ltd vs State of Kerala", link: "https://www.caseciter.com/bhagheeratha-engineering-ltd-vs-state-of-kerala-2026-insc-4-arbitration-act/" },
+            5: { name: "Motilal Oswal Financial Service Limited vs Santosh Cordeiro", link: "https://www.caseciter.com/motilal-oswal-financial-service-limited-vs-santosh-cordeiro-2026-insc-5-arbitration-act/" },
+            6: { name: "Bhadra International (India) Pvt. Ltd. vs Airports Authority of India", link: "https://www.caseciter.com/bhadra-international-india-pvt-ltd-vs-airports-authority-of-india-2026-insc-6/" },
+            7: { name: "R. Murali v. State of Tamil Nadu", link: "https://www.google.com/search?q=https://www.caseciter.com/nirbhay-singh-suliya-vs-state-of-madhya-phadesh-judiciary-disciplinary-proceedings-wrong-order/" },
+            8: { name: "NAK Engineering Company Pvt. Ltd. v. Tarun Keshrichand Shah", link: "https://www.caseciter.com/nak-engineering-company-pvt-ltd-v-tarun-keshrichand-shah-and-ors-2026-insc-8-cpc-dominus-litis-necessary-proper-party/" },
+            9: { name: "Panganti Vijaya v. United India Insurance Co. Ltd.", link: "https://www.caseciter.com/panganti-vijaya-v-united-india-insurance-co-ltd-2026-insc-9-workmans-compensation-act/" },
+            10: { name: "Dharmendra Sharma v. M. Arunmozhi", link: "https://www.caseciter.com/dharmendra-sharma-v-m-arunmozhi-2026-insc-10-contempt/" },
+            55: { name: "Centre for Public Interest Litigation v. Union of India", link: "https://www.caseciter.com/centre-for-public-interest-litigation-v-union-of-india-2026-insc-55-s-17-a-prevention-of-corruption-act-constitutional-validity-split-verdict/#gsc.tab=0" },
+            57: { name: "Vijay Kumar & Ors. v. State of Rajasthan", link: "https://www.caseciter.com/vijay-kumar-ors-v-state-of-rajasthan/#gsc.tab=0" },
+            61: { name: "Pradip Monu Arunkumar Chhotelal Tiwari v. State of Gujarat", link: "https://www.caseciter.com/pradip-monu-arunkumar-chhotelal-tiwari-v-state-of-gujarat-slp-failure-to-disclose-all-material-facts/" }
         };
 
-        function handleRedirect() {
-            const val = parseInt(document.getElementById('caseInput').value);
-            const error = document.getElementById('errorMsg');
+        const input = document.getElementById('caseInput');
+        const grid = document.getElementById('numberGrid');
+        const searchSection = document.getElementById('searchSection');
+        const resultSection = document.getElementById('resultSection');
+        const docSection = document.getElementById('docSection');
+
+        function handleRedirect(value) {
+            const val = value ? parseInt(value) : parseInt(input.value);
             if (val && val > 0) {
-                error.style.opacity = '0';
-                if (caseDatabase[val]) {
-                    window.open(caseDatabase[val], '_blank');
-                } else {
-                    window.open(`https://www.caseciter.com/2026insc${val}`, '_blank');
-                }
+                document.getElementById('errorMsg').style.opacity = '0';
+                
+                // Switch to Result View
+                searchSection.classList.add('opacity-0', '-translate-y-4');
+                docSection.classList.add('hidden');
+                
+                setTimeout(() => {
+                    searchSection.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+                    
+                    document.getElementById('resultNumber').innerText = val;
+                    const caseInfo = caseDatabase[val];
+                    document.getElementById('caseName').innerText = caseInfo ? caseInfo.name : "Judgment Case - " + val;
+                    document.getElementById('judgmentLink').href = caseInfo ? caseInfo.link : `https://www.caseciter.com/2026insc${val}`;
+                    
+                    setTimeout(() => {
+                        resultSection.classList.remove('opacity-0', 'translate-y-4');
+                    }, 50);
+                }, 400);
             } else {
-                error.style.opacity = '1';
-                setTimeout(() => { error.style.opacity = '0'; }, 2000);
+                document.getElementById('errorMsg').style.opacity = '1';
+                setTimeout(() => { document.getElementById('errorMsg').style.opacity = '0'; }, 2000);
             }
+        }
+
+        function resetSearch() {
+            resultSection.classList.add('opacity-0', 'translate-y-4');
+            setTimeout(() => {
+                resultSection.classList.add('hidden');
+                searchSection.classList.remove('hidden');
+                docSection.classList.remove('hidden');
+                setTimeout(() => {
+                    searchSection.classList.remove('opacity-0', '-translate-y-4');
+                    input.value = '';
+                    grid.classList.add('hidden');
+                    input.focus();
+                }, 50);
+            }, 400);
         }
 
         function toggleInfo() {
             const content = document.getElementById('infoContent');
-            const arrow = document.getElementById('infoArrow');
             if (content.classList.contains('hidden')) {
                 content.classList.remove('hidden');
-                arrow.style.transform = 'rotate(180deg)';
+                document.getElementById('infoArrow').style.transform = 'rotate(180deg)';
             } else {
                 content.classList.add('hidden');
-                arrow.style.transform = 'rotate(0deg)';
+                document.getElementById('infoArrow').style.transform = 'rotate(0deg)';
             }
         }
 
-        document.getElementById('caseInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleRedirect();
+        input.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (!val) { grid.classList.add('hidden'); return; }
+            grid.innerHTML = '';
+            for (let i = 1; i <= 61; i++) {
+                if (i.toString().startsWith(val)) {
+                    const item = document.createElement('div');
+                    item.className = 'case-grid-item bg-gray-50 p-2 rounded text-xs font-sans font-bold text-gray-400 shadow-sm';
+                    item.innerText = i;
+                    item.onclick = () => handleRedirect(i);
+                    grid.appendChild(item);
+                }
+            }
+            grid.classList.remove('hidden');
         });
+
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleRedirect(); });
     </script>
 </body>
 </html>
