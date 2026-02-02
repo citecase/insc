@@ -1,10 +1,10 @@
-name: Convert PDF to Markdown
+name: HTML to Markdown Converter
 
 on:
   push:
     paths:
-      - '**.pdf'
-  workflow_dispatch:  # <--- Add this line to enable the manual "Run workflow" button
+      - '**.html'  # Triggers when an HTML file is uploaded
+  workflow_dispatch:
 
 jobs:
   convert:
@@ -22,8 +22,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: |
-          pip install pdfplumber pandas tabulate
+        run: pip install beautifulsoup4 pandas tabulate lxml
 
       - name: Run Conversion Script
         run: python convert.py
@@ -31,5 +30,5 @@ jobs:
       - name: Commit and Push README
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Auto-update: Markdown table generated from PDF"
+          commit_message: "Auto-update: Markdown table generated from HTML"
           file_pattern: 'README.md'
