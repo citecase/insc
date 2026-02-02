@@ -3,13 +3,14 @@ name: Convert PDF to Markdown
 on:
   push:
     paths:
-      - '**.pdf'  # Triggers when a PDF is uploaded/updated
+      - '**.pdf'
+  workflow_dispatch:  # <--- Add this line to enable the manual "Run workflow" button
 
 jobs:
   convert:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Allows the action to commit the README.md back to your repo
+      contents: write
 
     steps:
       - name: Checkout Repository
