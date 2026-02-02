@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup
 import glob
 import os
 
-def extract_html_table():
-    # Automatically find any HTML file in the directory
+def extract_case_details():
+    # Find any HTML file in the root directory
     html_files = glob.glob("*.html")
     if not html_files:
         print("No HTML file found.")
@@ -14,48 +14,62 @@ def extract_html_table():
     print(f"Processing: {html_path}")
     
     with open(html_path, 'r', encoding='utf-8') as f:
-        soup = BeautifulSoup(f, 'html.parser')
+        soup = BeautifulSoup(f, 'lxml')
 
-    # Find the table in the Supreme Court document [cite: 3]
-    table = soup.find('table')
-    if not table:
-        print("No table found in HTML.")
+    # Find the specific table containing "Diary Number" or "Case Number" [cite: 3, 14, 54]
+    target_table = None
+    for table in soup.find_all('table'):
+        header_text = table.get_text().lower()
+        if "diary number" in header_text or "case number" in header_text:
+            target_table = table
+            break
+
+    if not target_table:
+        print("Could not find the specific case details table.")
         return
 
     data = []
-    # Extract headers [cite: 3]
-    headers = [th.get_text(strip=True) for th in table.find_all('th')]
-    if not headers:
-        # Fallback if the table uses <td> for headers
-        rows = table.find_all('tr')
-        headers = [td.get_text(strip=True) for td in rows[0].find_all('td')]
-        rows = rows[1:]
-    else:
-        rows = table.find_all('tr')[1:]
-
+    rows = target_table.find_all('tr')
+    
     for row in rows:
-        cols = row.find_all('td')
-        # Handle rows with links in the 'Judgment' column [cite: 3, 119]
+        cols = row.find_all(['td', 'th'])
+        # Skip small layout tables or navigation rows [cite: 1, 12, 122]
+        if len(cols) < 5:
+            continue
+            
         row_data = []
-        for i, col in enumerate(cols):
+        for col in cols:
+            # Extract links specifically for PDFs attached to Neutral Citations [cite: 3, 34, 104]
             link = col.find('a')
+            cell_text = col.get_text(separator=" ", strip=True)
+            
             if link and link.get('href'):
-                # Convert to Markdown link format [cite: 3, 4]
-                cell_text = f"[{col.get_text(strip=True)}]({link['href']})"
+                url = link['href']
+                # Ensure the URL points to the sci.gov.in portal [cite: 4, 16, 21]
+                if not url.startswith('http'):
+                    url = "https://www.sci.gov.in" + url
+                
+                # Format as Markdown link [Text](Direct_PDF_URL)
+                row_data.append(f"[{cell_text}]({url})")
             else:
-                cell_text = col.get_text(strip=True).replace('\n', ' ')
-            row_data.append(cell_text)
+                row_data.append(cell_text)
         
         if row_data:
             data.append(row_data)
 
-    # Create DataFrame and save as README.md
-    df = pd.DataFrame(data, columns=headers if len(headers) == len(data[0]) else None)
-    md_output = "# Supreme Court Judgments Summary\n\n" + df.to_markdown(index=False)
+    if not data:
+        print("No case data extracted.")
+        return
+
+    # Use first valid row as header 
+    df = pd.DataFrame(data[1:], columns=data[0])
     
+    # Save to README.md
     with open("README.md", "w", encoding="utf-8") as f:
-        f.write(md_output)
-    print("Successfully converted HTML table to README.md")
+        f.write("# Supreme Court Judgments - PDF API Links\n\n")
+        f.write("Click on the **Judgment** column citations to open the official PDF.\n\n")
+        f.write(df.to_markdown(index=False))
+    print("Successfully generated README.md with direct PDF links.")
 
 if __name__ == "__main__":
-    extract_html_table()
+    extract_case_details()
